@@ -16,7 +16,7 @@ class StatsController extends Controller
      */
     public function __invoke()
     {
-        return Cache::remember('stats', 3600, function () {
+        return Cache::forever('stats', function () {
             $usersCount = User::count();
             $postCount = Post::count();
             $userWithNoPosts = User::whereDoesntHave('posts')->count();
