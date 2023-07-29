@@ -3,6 +3,9 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\PostController;
+use App\Http\Controllers\Api\StatsController;
+use App\Http\Controllers\Api\TagController;
 
 /*
 |--------------------------------------------------------------------------
@@ -20,5 +23,13 @@ Route::post('/auth/login', [AuthController::class, 'login']);
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/verify', [AuthController::class, 'verify']);
-    
+
+    Route::apiResource('/tags', TagController::class);
+
+    Route::get('/posts/trash', [PostController::class, 'trash']);
+    Route::get('/posts/{post}', [PostController::class, 'restore']);
+    Route::post('/posts/{post}', [PostController::class, 'update']);
+    Route::apiResource('/posts', PostController::class);
 });
+
+Route::get('/stats', StatsController::class);
