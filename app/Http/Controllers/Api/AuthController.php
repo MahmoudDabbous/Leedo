@@ -52,8 +52,8 @@ class AuthController extends Controller
             ], 401);
         }
 
-        /** @var User */
         $user = User::where('phone', $request->phone)->first();
+        $user->tokens()->delete();
 
         if (!$user->email_verified_at) {
             return response()->json([
