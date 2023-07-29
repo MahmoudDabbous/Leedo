@@ -5,20 +5,27 @@ namespace App\Http\Controllers\Api;
 use App\Models\User;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Validator;
 
 class AuthController extends Controller
 {
     public function register(Request $request)
     {
-        $request->validate([
+        $validateUser = Validator::make($request->all(), [
             'name' => 'required|string',
-            'phone' => 'required|unique:users,phone',
-            'password' => 'required|confirmed'
+            'phone' => 'required|string|unique:users,phone',
+            'password' => 'required|min:6|confirmed'
         ]);
+
+        if ($validateUser->fails()) {
+            return response()->json([
+                'errors' => $validateUser->errors()
+            ], 401);
+        }
 
 
         $code = Str::random(6);
