@@ -10,21 +10,20 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
+use Symfony\Component\HttpFoundation\Response;
 
 class AuthController extends Controller
 {
     public function register(Request $request)
     {
-        $validateUser = Validator::make($request->all(), [
+        $data = Validator::make($request->all(), [
             'name' => 'required|string',
             'phone' => 'required|string|unique:users,phone',
             'password' => 'required|min:6|confirmed'
         ]);
 
-        if ($validateUser->fails()) {
-            return response()->json([
-                'errors' => $validateUser->errors()
-            ], 401);
+        if ($data->fails()) {
+            return response()->json($data->errors(), Response::HTTP_BAD_REQUEST);
         }
 
 
@@ -43,7 +42,7 @@ class AuthController extends Controller
         return response()->json([
             'user' => $user,
             'token' => $user->createToken("access_token")->plainTextToken
-        ], 201);
+        ], Response::HTTP_CREATED);
     }
 
     public function login(Request $request)
@@ -56,7 +55,7 @@ class AuthController extends Controller
         if (!Auth::attempt($request->only(['phone', 'password']))) {
             return response()->json([
                 'message' => 'Phone or Password are wrong.',
-            ], 401);
+            ], Response::HTTP_UNAUTHORIZED);
         }
 
         $user = User::where('phone', $request->phone)->first();
@@ -65,13 +64,13 @@ class AuthController extends Controller
         if (!$user->email_verified_at) {
             return response()->json([
                 'message' => 'User not verified.',
-            ], 401);
+            ], Response::HTTP_UNAUTHORIZED);
         }
 
         return response()->json([
             'user' => $user,
             'token' => $user->createToken('access_token')->plainTextToken,
-        ], 200);
+        ], Response::HTTP_OK);
     }
 
     public function verify(Request $request)
@@ -83,13 +82,13 @@ class AuthController extends Controller
         $user = User::where('verification_code', $request->code)->first();
 
         if (!$user) {
-            return response()->json(['error' => 'Invalid verification code'], 401);
+            return response()->json(['error' => 'Invalid verification code'], Response::HTTP_UNAUTHORIZED);
         }
 
         $user->markEmailAsVerified();
         $user->verification_code = null;
         $user->save();
 
-        return response()->json(['message' => 'Verification successful']);
+        return response()->json(['message' => 'Verification successful'], Response::HTTP_OK);
     }
 }
