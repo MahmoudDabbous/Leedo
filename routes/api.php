@@ -20,10 +20,8 @@ use App\Http\Controllers\Api\TagController;
 
 Route::post('/auth/register', [AuthController::class, 'register']);
 Route::post('/auth/login', [AuthController::class, 'login']);
-
+Route::get('/verify', [AuthController::class, 'verify']);
 Route::middleware('auth:sanctum')->group(function () {
-
-    Route::get('/verify', [AuthController::class, 'verify']);
     Route::apiResource('/tags', TagController::class);
 
     Route::get('/posts/trash', [PostController::class, 'trash']);
